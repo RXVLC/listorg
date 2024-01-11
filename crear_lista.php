@@ -18,8 +18,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Verificar si el PIN ingresado coincide con el almacenado
         if ($pin === $pin_almacenado) {
             // Acceso permitido
+            session_start();
+            $_SESSION['nombre_lista'] = $nombre_lista;
             // Redirigir a la página de visualización de participantes
-            header("Location: ver_participantes.php?nombre_lista=$nombre_lista");
+            // header("Location: ver_participantes.php?nombre_lista=$nombre_lista");
+            header("Location: ver_participantes.php");
             exit(); // Asegurarse de que el script se detenga después de la redirección
         } else {
             $error_message = "Error: PIN incorrecto";

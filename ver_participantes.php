@@ -1,3 +1,39 @@
+<?php
+// Inicia la sesión al principio del archivo
+session_start();
+
+include 'conexion.php';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST['nombreParticipante'])) {
+        $nombreParticipante = $_POST['nombreParticipante'];
+
+        // Verifica si existe la variable de sesión 'nombre_lista'
+        if (isset($_SESSION['nombre_lista'])) {
+            $nombre_lista = $_SESSION['nombre_lista'];
+
+            $consulta = "INSERT INTO part_$nombre_lista (nombre) VALUES ('$nombreParticipante')";
+            if ($conexion->query($consulta) === TRUE) {
+                // Redirige a la misma página después de la inserción
+                header("Location: ver_participantes.php");
+                exit();
+            } else {
+                header("Location: index.php"); // Ajusta según el nombre real de tu página de inicio
+                exit();
+            }
+        } else {
+            echo "Error: No se ha establecido la variable de sesión 'nombre_lista'.";
+        }
+    } else {
+        echo "No se recibieron todos los datos necesarios.";
+    }
+}
+if (!isset($_SESSION['nombre_lista'])) {
+    header("Location: ./");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -42,13 +78,16 @@
             <h2 class="text-center mb-4">Lista de Participantes</h2>
             <div class="text-center mb-4">
             <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#inscribirseModal">
-                    Inscribirse
-                </button>
+                Inscribirse
+            </button>
             <button type="button" class="btn btn-primary btn-order d-inline-block mr-2" onclick="toggleOrden()">
-                    Orden <span id="ordenText">Ascendente</span> <i id="arrowIcon" class="fas fa-arrow-down ml-2"></i>
-                </button>
-                        <a href="/" class="btn btn-danger">Volver Atrás</a>
-            </div>
+                Orden <span id="ordenText">Ascendente</span> <i id="arrowIcon" class="fas fa-arrow-down ml-2"></i>
+            </button>
+            <form action="cerrar_sesion.php" method="post" class="d-inline">
+                <button type="submit" class="btn btn-danger">Cerrar Sesión</button>
+            </form>
+            <a href="./" class="btn btn-warning ml-2">Volver Atrás</a>
+        </div>
             <table id="participantes-table" class="table table-striped">
                 <!-- Encabezados de la tabla -->
                 <thead>
@@ -59,30 +98,26 @@
                 </thead>
                 <tbody>
                     <?php
-                    include 'conexion.php';
-
-                    // Mostrar los participantes en la tabla
-                    if(isset($_GET['nombre_lista'])) {
-                        $nombre_lista = $_GET['nombre_lista'];
-
-                        $consulta = "SELECT * FROM part_$nombre_lista"; // Reemplaza 'nombre_tabla' por tu tabla
+                    if (isset($_SESSION['nombre_lista'])) {
+                        $nombre_lista = $_SESSION['nombre_lista'];
+                    
+                        // Mostrar los participantes en la tabla
+                        $consulta = "SELECT * FROM part_$nombre_lista";
                         $resultado = $conexion->query($consulta);
-
+                    
                         if ($resultado->num_rows > 0) {
                             $contador = 1;
                             while ($fila = $resultado->fetch_assoc()) {
                                 echo "<tr>";
                                 echo "<td>" . $contador . "</td>";
-                                echo "<td>" . $fila['nombre'] . "</td>"; // Reemplaza 'nombre_columna' por el nombre de la columna que contiene los nombres
+                                echo "<td>" . $fila['nombre'] . "</td>";
                                 echo "</tr>";
                                 $contador++;
                             }
                         } else {
                             echo "<tr><td colspan='2'>No hay participantes en esta lista.</td></tr>";
                         }
-                    } else {
-                        echo "<tr><td colspan='2'>No se proporcionó el nombre de la lista.</td></tr>";
-                    }
+                    } 
                     ?>
                 </tbody>
             </table>
@@ -179,34 +214,3 @@
 
 
 
-<?php
-include 'conexion.php';
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if(isset($_POST['nombre_lista']) && isset($_POST['nombreParticipante'])) {
-        $nombre_lista = $_POST['nombre_lista'];
-        $nombreParticipante = $_POST['nombreParticipante'];
-
-        $consulta = "INSERT INTO part_$nombre_lista (nombre) VALUES ('$nombreParticipante')";
-        if ($conexion->query($consulta) === TRUE) {
-            echo "<script>window.location='ver_participantes.php?nombre_lista=$nombre_lista';</script>";
-
-        } else {
-            echo "Error al inscribirse en la lista: " . $conexion->error;
-        }
-    } else {
-        echo "No se recibieron todos los datos necesarios.";
-    }
-}
-?>
-
-
-<?php
-// Verificar si se ha enviado la variable nombre_lista en la URL
-if(isset($_GET['nombre_lista'])) {
-    // Obtener el valor de nombre_lista
-    $nombre_lista = $_GET['nombre_lista'];
-} else {
-    echo "La variable nombre_lista no está definida en la URL.";
-}
-?>

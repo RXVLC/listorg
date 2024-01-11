@@ -116,7 +116,7 @@
                     <form action="crear_lista.php" method="post">
                         <div class="form-group">
                             <label for="nombre_lista">Nombre de la Lista:</label>
-                            <input type="text" class="form-control" id="nombre_lista" name="nombre_lista" required>
+                            <input type="text" class="form-control" id="nombre_lista" name="nombre_lista" value="<?php echo isset($_GET['nombre_lista']) ? htmlspecialchars($_GET['nombre_lista']) : ''; ?>" required>
                         </div>
                         <div class="form-group">
                             <label for="pin">PIN:</label>
